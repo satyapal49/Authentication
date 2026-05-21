@@ -4,8 +4,10 @@ const TryCatch = (handler) => {
             await handler (req, res, next);
         } catch (error) {
             res.status(500).json({
-                message: message.error,
+                message: error.message,
             })
         }
     }
-} 
+}
+
+export default TryCatch;

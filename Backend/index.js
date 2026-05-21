@@ -12,8 +12,12 @@ const app = express();
 // Importing router
 import userRoutes from './routes/user.js'
 
+// middleware
+app.use(express.json());
+
 // using routes
-app.use("/api/v1", userRoutes)
+app.use("/api/v1", userRoutes);
+
 
 
 
