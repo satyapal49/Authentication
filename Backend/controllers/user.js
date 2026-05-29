@@ -2,6 +2,13 @@ import { ZodError } from 'zod';
 import { registerSchema } from '../config/zod.js';
 import TryCatch from '../middlewares/tryCatch.js';
 import sanitize from 'mongo-sanitize';
+import { redisClient } from '../index.js';
+import { User } from '../models/User.js';
+import bcrypt from 'bcrypt';
+import crypto from 'crypto';
+import SendmailTransport from 'nodemailer/lib/sendmail-transport/index.js';
+import sendMail from '../config/sendMail.js';
+import { getVerifyEmailHtml } from '../config/html.js';
 
 export const registerUser = TryCatch(async(req, res)=>{
     const sanitizeBody = sanitize(req.body);
@@ -30,9 +37,43 @@ export const registerUser = TryCatch(async(req, res)=>{
     }
 
     const {name, email, password} = validation.data;
-    res.json({
+    const rateLimitKey = `register-rate-limit:${req.ip}:${email}`;
+    if( await redisClient.get(rateLimitKey)){
+        return res.status(429).json({
+            message: 'too many request, try again later',
+        })
+    }
+
+    const existingUser = await User.findOne({email})
+    if(existingUser){
+        return res.status(400).json({
+            message: 'User already exists',
+        });
+    }
+
+    const hashPassword = await bcrypt.hash(password, 10);
+
+    const verifyToken = crypto.randomBytes(32).toString('hex');
+
+    const verifyKey = `verify:${verifyToken}`;
+
+    const dataStore = JSON.stringify({
         name,
         email,
-        password,
-    })
+        password : hashPassword,
+    });
+
+    await redisClient.set(verifyKey, dataStore, { EX : 300 });
+
+    const subject = 'verify your email for account creation';
+
+    const html = getVerifyEmailHtml({email, token: verifyToken});
+
+    await sendMail({email, subject, html});
+
+    await redisClient.set(rateLimitKey, 'true', { EX : 60 });
+
+    res.json({
+        message : "if your email is valid, a verification link has been sent. it will expire in 5 mins"
+    });
 })
