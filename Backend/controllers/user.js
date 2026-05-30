@@ -255,7 +255,7 @@ export const verifyOtp = TryCatch(async(req,res)=>{
     }
     // Once verified, remove the OTP so it cannot be reused
     await redisClient.del(otpKey);
-    
+
     let user = await User.findOne({email});
 
     const tokenData = await generateToken(user._id, res);

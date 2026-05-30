@@ -1,13 +1,13 @@
 import jwt from 'jsonwebtoken';
+import { redisClient } from '../index.js'; 
 
 // generateToken: create a JWT (JSON Web Token) for a given user id.
 // Returns the signed token string. This token can be returned to the client
 // and used to authenticate future requests.
-export const generateToken = async (id) => {
+export const generateToken = async (id, res) => {
     const accessToken = jwt.sign({ id }, process.env.JWT_SECRET, {
         expiresIn: "1m",
     });
-    return accessToken;
 
     const refreshToken = jwt.sign({ id }, process.env.REFRESH_SECRET, {
         expiresIn: "7d",
@@ -29,6 +29,5 @@ export const generateToken = async (id) => {
         sameSite: "none",
         // secure: true, 
     })
-
     return {accessToken, refreshToken};
 }
