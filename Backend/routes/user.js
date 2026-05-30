@@ -6,12 +6,11 @@ const router = express.Router();
 
 // Register a new user (creates a verification email)
 router.post("/register", registerUser);
-
 // Verify email using token that was emailed to the user
 router.post("/verify/:token", verifyUser);
-router.post("/verify-otp", verifyOtp)
 
 // Start login process (sends OTP to email)
 router.post("/login", loginUser);
+router.post("/verify-otp", verifyOtp)
 
 export default router;
