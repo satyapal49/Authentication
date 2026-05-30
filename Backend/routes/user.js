@@ -1,9 +1,17 @@
 import express from 'express';
-import { registerUser } from '../controllers/user.js';
+import { loginUser, registerUser, verifyOtp, verifyUser } from '../controllers/user.js';
 
+// Router groups authentication related routes under a single module.
 const router = express.Router();
 
-router.post("/register", registerUser)
+// Register a new user (creates a verification email)
+router.post("/register", registerUser);
 
+// Verify email using token that was emailed to the user
+router.post("/verify/:token", verifyUser);
+router.post("/verify-otp", verifyOtp)
+
+// Start login process (sends OTP to email)
+router.post("/login", loginUser);
 
 export default router;

@@ -1,3 +1,5 @@
+// html templates: These functions return HTML strings used in emails.
+// We keep HTML in JS so we can inject dynamic values like the user's email and OTP.
 export const getOtpHtml = ({ email, otp }) => {
     const html = `<!DOCTYPE html>
 <html lang="en">
@@ -188,6 +190,9 @@ Use the verification code below to complete your sign-in to Authentication App.
     return html;
 };
 export const getVerifyEmailHtml = ({ email, token }) => {
+    // getVerifyEmailHtml: returns an email body that includes a verification link.
+    // We read `APP_NAME` and `FRONTEND_URL` from environment variables so
+    // behavior can be customized per environment (local, staging, production).
     const appName = process.env.APP_NAME || "Authentication App";
     const baseUrl = process.env.FRONTEND_URL || "http://localhost:5173";
     const verifyUrl = `${baseUrl.replace(/\/+$/, "")}/token/${encodeURIComponent(
