@@ -2,6 +2,8 @@ import express from 'express';
 import dotenv from 'dotenv';
 import connectdb from './config/db.js';
 import { createClient } from 'redis';
+import userRoutes from './routes/user.js'
+import cookieParser from 'cookie-parser';
 
 // Load environment variables from a .env file into process.env
 dotenv.config();
@@ -30,11 +32,10 @@ redisClient.connect().then(() => console.log('connected redis')).catch(console.e
 // Create the Express application
 const app = express();
 
-// Importing router (group of related routes for user auth)
-import userRoutes from './routes/user.js'
 
 // Built-in middleware to parse JSON request bodies
 app.use(express.json());
+app.use(cookieParser());
 
 // Mount our user routes under "/api/v1"
 // Example: POST /api/v1/register

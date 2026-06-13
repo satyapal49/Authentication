@@ -4,12 +4,12 @@ import { User } from '../models/User.js';
 
 export const isAuth = async(req, res, next)=>{
     try {
-        const token = req.cookies?.accessToken;
+        const token = req.cookies.accessToken;
 
         if(!token){
             return res.status(403).json({
-                message: 'Please login - No Token'
-            })
+                message: "Please login - No Token",
+            });
         }
 
         const decodeData = jwt.verify(token, process.env.JWT_SECRET);
@@ -35,10 +35,14 @@ export const isAuth = async(req, res, next)=>{
             })
         }
 
-        await redisClient.setEX(`user:${user._id}`, 3600, JSON.stringify(user));
+        await redisClient.setEx(
+            `user:${user._id}`,
+            3600,
+            JSON.stringify(user)
+        );
 
         req.user = user;
-        next()
+        next();
     } catch (error) {
         res.status(500).json({
             message: error.message,

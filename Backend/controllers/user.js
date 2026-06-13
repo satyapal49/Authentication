@@ -13,7 +13,7 @@ import crypto from 'crypto';
 import SendmailTransport from 'nodemailer/lib/sendmail-transport/index.js';
 import sendMail from '../config/sendMail.js';
 import { getOtpHtml, getVerifyEmailHtml } from '../config/html.js';
-import { generateToken } from '../config/generateToken.js';
+import { generateAccessToken, generateToken, verifyRefreshToken, revokeRefreshToken } from '../config/generateToken.js';
 
 // registerUser: Handles new user registrations.
 // Steps:
@@ -267,8 +267,43 @@ export const verifyOtp = TryCatch(async(req,res)=>{
     
 });
 
-export const myProfile = TryCatch(async(req,res)=>{
+export const myProfile = TryCatch(async (req, res) => {
     const user = req.user
-
     res.json(user);
-})
+});
+
+export const refreshToken = TryCatch(async(req, res)=>{
+    const refreshToken = req.cookies.refreshToken;
+    if(!refreshToken){
+        return res.status(401).json({
+            message: "Invalid refresh token"
+        });
+    };
+    const decode = await verifyRefreshToken(refreshToken)
+    if(!decode){
+        return res.status(401).json({
+            message: "Invalid Refresh token",
+        })
+    }
+    generateAccessToken(decode.id, res);
+
+    res.status(200).json({
+        message: "token refreshed"
+    });
+}); 
+
+export const logoutUser = TryCatch(async(req, res) => {
+    const userId = req.user._id;
+    console.log("logout user id", userId);
+    await revokeRefreshToken(userId);
+
+    // Clear the authentication cookies
+    res.clearCookie("accessToken");
+    res.clearCookie("refreshToken");
+
+    await redisClient.del(`user:${userId}`);
+
+    res.json({
+        message: "Logged out successfully"
+    });
+});
