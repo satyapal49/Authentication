@@ -4,6 +4,7 @@ import connectdb from './config/db.js';
 import { createClient } from 'redis';
 import userRoutes from './routes/user.js'
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
 
 // Load environment variables from a .env file into process.env
 dotenv.config();
@@ -36,6 +37,12 @@ const app = express();
 // Built-in middleware to parse JSON request bodies
 app.use(express.json());
 app.use(cookieParser());
+// Enable CORS for all routes (you can configure this further in production)
+app.use(cors({
+  origin: process.env.FRONTEND_URL, // Allow requests from this origin (your frontend)
+  credentials: true, // Allow cookies to be sent with requests
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allowed HTTP methods
+}));
 
 // Mount our user routes under "/api/v1"
 // Example: POST /api/v1/register

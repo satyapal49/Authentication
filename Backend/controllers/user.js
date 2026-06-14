@@ -267,11 +267,13 @@ export const verifyOtp = TryCatch(async(req,res)=>{
     
 });
 
+// myProfile: Returns the authenticated user's profile.
 export const myProfile = TryCatch(async (req, res) => {
     const user = req.user
     res.json(user);
 });
 
+// refreshToken: Issues a new access token if the provided refresh token is valid.
 export const refreshToken = TryCatch(async(req, res)=>{
     const refreshToken = req.cookies.refreshToken;
     if(!refreshToken){
@@ -292,6 +294,7 @@ export const refreshToken = TryCatch(async(req, res)=>{
     });
 }); 
 
+// logoutUser: Logs out the authenticated user by revoking their refresh token and clearing cookies.
 export const logoutUser = TryCatch(async(req, res) => {
     const userId = req.user._id;
     console.log("logout user id", userId);

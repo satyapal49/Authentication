@@ -19,8 +19,7 @@ background: #f6f7fb;
 color: #111;
 -webkit-text-size-adjust: 100%;
 -ms-text-size-adjust: 100%;
-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, 'Apple Color
-Emoji','Segoe UI Emoji','Segoe UI Symbol', sans-serif;
+font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
 }
 table {
 border-collapse: collapse;
@@ -214,8 +213,7 @@ background: #f6f7fb;
 color: #111;
 -webkit-text-size-adjust: 100%;
 -ms-text-size-adjust: 100%;
-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, 'Apple Color
-Emoji','Segoe UI Emoji','Segoe UI Symbol', sans-serif;
+font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
 }
 table { border-collapse: collapse; }
 img {
@@ -323,8 +321,7 @@ word-break: break-all;
 Thanks for registering with ${appName}. Click the button below to verify your account.
 </p>
 <!-- Button -->
-<table role="presentation" border="0" cellspacing="0" cellpadding="0" style="margin: 16px 0
-20px 0;">
+<table role="presentation" border="0" cellspacing="0" cellpadding="0" style="margin: 16px 0 20px 0;">
 <tr>
 <td align="center">
 
