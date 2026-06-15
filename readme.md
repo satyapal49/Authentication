@@ -1,262 +1,264 @@
 # Authentication Project
 
-A full-stack authentication application with secure user registration, email verification, OTP-based login, and JWT session management. The backend handles validation, rate limiting, and token refresh; the frontend is a React + Vite app with pages scaffolded for each auth flow.
+A full-stack authentication app built with Node.js, Express, MongoDB, Redis, and React. It supports email-based registration verification, password login with OTP confirmation, JWT cookies, refresh tokens, and protected profile access.
 
-## 📋 Table of Contents
-
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
-- [Environment Setup](#environment-setup)
-- [Running the Application](#running-the-application)
-- [Authentication Flows](#authentication-flows)
-- [API Endpoints](#api-endpoints)
-- [Project Architecture](#project-architecture)
-- [Security Features](#security-features)
-
-## ✨ Features
+## Features
 
 ### Backend
-- **User Registration** — Validates input, hashes passwords, and sends a verification email
-- **Email Verification** — Temporary registration data stored in Redis; account created after link click
-- **OTP Login** — Two-step login: credentials check, then email OTP verification
-- **JWT Sessions** — Access and refresh tokens issued as httpOnly cookies
-- **Token Refresh** — Refresh endpoint rotates short-lived access tokens
-- **Protected Routes** — Auth middleware with Redis user caching
-- **Rate Limiting** — Redis-backed limits on register and login attempts
-- **Data Validation** — Zod schema validation on all inputs
-- **MongoDB Integration** — Persistent user storage via Mongoose
-- **Email Delivery** — Nodemailer with Gmail SMTP for verification and OTP emails
+
+- User registration with Zod validation and bcrypt password hashing
+- Email verification link before creating the user account
+- Login flow with email and password followed by a 6-digit OTP
+- Access token and refresh token issued as httpOnly cookies
+- Refresh token storage and revocation with Redis
+- Protected profile route using JWT authentication
+- Redis-backed temporary data for OTPs, verification tokens, user cache, and rate limits
+- Gmail SMTP email delivery with Nodemailer
+- NoSQL injection protection with `mongo-sanitize`
+- CORS configured for the frontend origin
 
 ### Frontend
-- **React + Vite** — Fast dev server with HMR
-- **Tailwind CSS v4** — Utility-first styling
-- **Page Scaffolding** — Routes prepared for Home, Register, Login, Verify, VerifyOtp, and Dashboard (UI in progress)
+
+- React 19 with Vite
+- React Router routing for Home, Login, Register, and VerifyOtp
+- Axios request setup used in the Login page
+- Tailwind CSS v4 styling
+- Login page UI and OTP navigation flow started
+- Register, Verify, VerifyOtp, and Dashboard pages are currently scaffolded/in progress
 
 ## Tech Stack
 
 ### Backend
-| Package | Purpose |
-|---------|---------|
+
+| Tool | Purpose |
+| --- | --- |
 | Node.js | JavaScript runtime |
-| Express.js (v5) | Web framework |
-| MongoDB + Mongoose | Database and ODM |
-| Redis | OTP storage, rate limits, temp registration data, refresh tokens, user cache |
+| Express.js | API server |
+| MongoDB + Mongoose | User database and schema modeling |
+| Redis | OTPs, verification tokens, rate limits, refresh tokens, and cache |
 | JWT | Access and refresh token signing |
-| Bcrypt | Password hashing |
+| bcrypt | Password hashing |
 | Zod | Request validation |
-| Nodemailer | Transactional email (Gmail SMTP) |
-| Cookie Parser | httpOnly cookie handling |
-| mongo-sanitize | NoSQL injection prevention |
+| Nodemailer | Email delivery |
+| cookie-parser | Cookie handling |
+| cors | Frontend/backend cross-origin requests |
+| mongo-sanitize | NoSQL injection protection |
 
 ### Frontend
-| Package | Purpose |
-|---------|---------|
-| React 19 | UI library |
-| Vite 8 | Build tool and dev server |
-| React Router DOM | Client-side routing (to be wired) |
-| Axios | HTTP client (to be wired) |
-| Tailwind CSS v4 | Styling |
-| React Toastify | Toast notifications (to be wired) |
+
+| Tool | Purpose |
+| --- | --- |
+| React | UI framework |
+| Vite | Development server and build tool |
+| React Router DOM | Client-side routing |
+| Axios | HTTP requests |
+| Tailwind CSS | Utility-first styling |
+| React Toastify | Toast notifications dependency |
 
 ## Project Structure
 
-```
+```text
 AUTHENTICATION/
 ├── Backend/
-│   ├── index.js                    # App entry point, Redis + Express setup
+│   ├── index.js
 │   ├── package.json
-│   ├── .env                        # Environment variables (not committed)
 │   ├── config/
-│   │   ├── db.js                   # MongoDB connection
-│   │   ├── zod.js                  # Validation schemas
-│   │   ├── generateToken.js        # JWT access/refresh token helpers
-│   │   ├── sendMail.js             # Nodemailer SMTP transport
-│   │   └── html.js                 # Email HTML templates
+│   │   ├── db.js
+│   │   ├── generateToken.js
+│   │   ├── html.js
+│   │   ├── sendMail.js
+│   │   └── zod.js
 │   ├── controllers/
-│   │   └── user.js                 # Register, verify, login, OTP, profile, logout
+│   │   └── user.js
 │   ├── middlewares/
-│   │   ├── tryCatch.js             # Async error wrapper
-│   │   └── isAuth.js               # JWT auth + Redis user cache
+│   │   ├── isAuth.js
+│   │   └── tryCatch.js
 │   ├── models/
-│   │   └── User.js                 # User schema
+│   │   └── User.js
 │   └── routes/
-│       └── user.js                 # Auth route definitions
-└── Frontend/
-    ├── index.html
-    ├── vite.config.js
-    ├── package.json
-    └── src/
-        ├── App.jsx
-        ├── main.jsx
-        └── pages/
-            ├── Home.jsx
-            ├── Register.jsx
-            ├── Login.jsx
-            ├── Verify.jsx          # Email verification callback
-            ├── VerifyOtp.jsx       # OTP entry after login
-            └── Dashboard.jsx       # Protected page
+│       └── user.js
+├── Frontend/
+│   ├── index.html
+│   ├── package.json
+│   ├── vite.config.js
+│   └── src/
+│       ├── App.jsx
+│       ├── main.jsx
+│       ├── index.css
+│       └── pages/
+│           ├── Dashboard.jsx
+│           ├── Home.jsx
+│           ├── Login.jsx
+│           ├── Register.jsx
+│           ├── Verify.jsx
+│           └── VerifyOtp.jsx
+└── readme.md
 ```
 
 ## Prerequisites
 
-- Node.js (v18 or higher recommended)
-- MongoDB (local instance or Atlas)
-- Redis (local instance or hosted — required for the app to start)
-- Gmail account with an App Password (for SMTP email delivery)
+- Node.js 18 or newer
 - npm
+- MongoDB, either local or Atlas
+- Redis, either local or hosted
+- Gmail account with an app password for SMTP
 
 ## Installation
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd AUTHENTICATION
-   ```
+Clone the repository and install dependencies for both apps:
 
-2. **Install backend dependencies**
-   ```bash
-   cd Backend
-   npm install
-   ```
+```bash
+git clone <repository-url>
+cd AUTHENTICATION
 
-3. **Install frontend dependencies**
-   ```bash
-   cd ../Frontend
-   npm install
-   ```
+cd Backend
+npm install
 
-## Environment Setup
+cd ../Frontend
+npm install
+```
 
-Create a `.env` file in the `Backend` directory:
+## Environment Variables
+
+Create a `.env` file inside `Backend/`.
 
 ```env
-# Database
 MONGO_URI=mongodb://localhost:27017/authentication
-# OR MongoDB Atlas:
-# MONGO_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/authentication
-
-# Redis (required — app exits if missing)
 REDIS_URL=redis://localhost:6379
 
-# Server
 PORT=5000
 NODE_ENV=development
 
-# JWT
 JWT_SECRET=your_access_token_secret
 REFRESH_SECRET=your_refresh_token_secret
 
-# Email (Gmail SMTP)
 SMTP_USER=your@gmail.com
 SMTP_PASSWORD=your_gmail_app_password
 
-# App branding & frontend URL (used in verification emails)
 APP_NAME=Authentication App
 FRONTEND_URL=http://localhost:5173
 ```
 
-## Running the Application
+Important: `Frontend/src/main.jsx` currently exports:
 
-Start MongoDB and Redis before launching the backend.
+```js
+export const server = "http://localhost:5052"
+```
 
-**Backend (development)**
+For local development, either run the backend with `PORT=5052` or update that frontend value to match your backend port, such as `http://localhost:5000`.
+
+## Running the App
+
+Start MongoDB and Redis first.
+
+Run the backend:
+
 ```bash
 cd Backend
 npm run dev
 ```
-Server runs on `http://localhost:5000` by default.
 
-**Frontend (development)**
+Run the frontend in another terminal:
+
 ```bash
 cd Frontend
 npm run dev
 ```
-Vite dev server runs on `http://localhost:5173` by default.
 
-**Production**
+Default local URLs:
+
+- Frontend: `http://localhost:5173`
+- Backend: `http://localhost:5000`, unless `PORT` is changed
+
+## Available Scripts
+
+### Backend
+
 ```bash
-# Backend
-cd Backend && npm start
-
-# Frontend
-cd Frontend && npm run build && npm run preview
+npm run dev      # Start with nodemon
+npm start        # Start with node
+npm test         # Placeholder test script
 ```
 
-## Authentication Flows
+### Frontend
 
-### Registration
-1. Client sends `POST /api/v1/register` with name, email, and password.
-2. Server validates input, rate-limits the request, and stores hashed credentials in Redis (5-minute TTL).
-3. A verification email is sent with a link to `{FRONTEND_URL}/token/{token}`.
-4. Client calls `POST /api/v1/verify/:token` to create the user in MongoDB.
+```bash
+npm run dev      # Start Vite
+npm run build    # Build for production
+npm run preview  # Preview production build
+npm run lint     # Run ESLint
+```
 
-### Login
-1. Client sends `POST /api/v1/login` with email and password.
-2. Server validates credentials and emails a 6-digit OTP (5-minute TTL in Redis).
-3. Client sends `POST /api/v1/verify-otp` with email and OTP.
-4. Server sets `accessToken` (1 min) and `refreshToken` (7 days) as httpOnly cookies.
+## Authentication Flow
+
+### Register and Verify Email
+
+1. Client sends `POST /api/v1/register` with `name`, `email`, and `password`.
+2. Backend validates the request and checks the register rate limit.
+3. Password is hashed and temporary registration data is stored in Redis for 5 minutes.
+4. Backend sends an email verification link to the user.
+5. Client sends `POST /api/v1/verify/:token`.
+6. Backend creates the user in MongoDB and deletes the temporary Redis entry.
+
+### Login and Verify OTP
+
+1. Client sends `POST /api/v1/login` with `email` and `password`.
+2. Backend validates credentials and checks the login rate limit.
+3. Backend sends a 6-digit OTP to the user's email.
+4. OTP is stored in Redis for 5 minutes.
+5. Client sends `POST /api/v1/verify-otp` with `email` and `otp`.
+6. Backend sets `accessToken` and `refreshToken` cookies.
 
 ### Session Management
-- `GET /api/v1/me` — Returns the authenticated user's profile (requires access token cookie).
-- `POST /api/v1/refresh` — Issues a new access token using the refresh token cookie.
-- `POST /api/v1/logout` — Revokes refresh token and clears cookies.
+
+- `GET /api/v1/me` returns the authenticated user's profile.
+- `POST /api/v1/refresh` creates a new access token from a valid refresh token cookie.
+- `POST /api/v1/logout` revokes the refresh token, clears cookies, and removes cached user data.
 
 ## API Endpoints
 
-Base URL: `http://localhost:5000/api/v1`
+Base URL:
 
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| POST | `/register` | No | Register; sends verification email |
-| POST | `/verify/:token` | No | Complete registration via email token |
-| POST | `/login` | No | Validate credentials; send OTP email |
-| POST | `/verify-otp` | No | Verify OTP; set auth cookies |
-| GET | `/me` | Yes | Get current user profile |
-| POST | `/refresh` | Cookie | Refresh access token |
+```text
+http://localhost:<PORT>/api/v1
+```
+
+| Method | Endpoint | Auth Required | Description |
+| --- | --- | --- | --- |
+| POST | `/register` | No | Register a user and send verification email |
+| POST | `/verify/:token` | No | Verify email and create account |
+| POST | `/login` | No | Validate credentials and send OTP |
+| POST | `/verify-otp` | No | Verify OTP and set auth cookies |
+| GET | `/me` | Yes | Get authenticated user profile |
+| POST | `/refresh` | Refresh cookie | Refresh access token |
 | POST | `/logout` | Yes | Log out and clear session |
 
-### Example: Register
+## Example Requests
+
+### Register
+
 ```bash
 curl -X POST http://localhost:5000/api/v1/register \
   -H "Content-Type: application/json" \
   -d '{"name":"John Doe","email":"john@example.com","password":"securePass123"}'
 ```
 
-**Response (200)**
-```json
-{
-  "message": "if your email is valid, a verification link has been sent. it will expire in 5 mins"
-}
-```
+### Verify Email
 
-### Example: Verify Email
 ```bash
 curl -X POST http://localhost:5000/api/v1/verify/<token>
 ```
 
-**Response (201)**
-```json
-{
-  "message": "Email Verified Successfully! Your Account has been created",
-  "user": {
-    "_id": "...",
-    "name": "John Doe",
-    "email": "john@example.com"
-  }
-}
-```
+### Login
 
-### Example: Login
 ```bash
 curl -X POST http://localhost:5000/api/v1/login \
   -H "Content-Type: application/json" \
   -d '{"email":"john@example.com","password":"securePass123"}'
 ```
 
-### Example: Verify OTP
+### Verify OTP and Store Cookies
+
 ```bash
 curl -X POST http://localhost:5000/api/v1/verify-otp \
   -H "Content-Type: application/json" \
@@ -264,59 +266,42 @@ curl -X POST http://localhost:5000/api/v1/verify-otp \
   -d '{"email":"john@example.com","otp":"123456"}'
 ```
 
-### Example: Get Profile
+### Get Profile
+
 ```bash
 curl http://localhost:5000/api/v1/me -b cookies.txt
 ```
 
-## Project Architecture
+### Refresh Token
 
-```
-Client Request
-     │
-     ▼
-  Routes (user.js)
-     │
-     ▼
-  Middleware (isAuth / tryCatch)
-     │
-     ▼
-  Controllers (user.js)
-     │
-     ├──► Zod validation
-     ├──► Redis (OTP, rate limits, temp data, tokens, cache)
-     ├──► MongoDB via Mongoose (User model)
-     └──► Nodemailer (verification & OTP emails)
-     │
-     ▼
-  JSON Response / httpOnly Cookies
+```bash
+curl -X POST http://localhost:5000/api/v1/refresh -b cookies.txt -c cookies.txt
 ```
 
-## Security Features
+### Logout
 
-- Passwords hashed with bcrypt (10 salt rounds)
-- JWT access tokens (1 min) and refresh tokens (7 days) in httpOnly cookies
-- Refresh tokens stored in Redis and validated on refresh
-- OTP and registration data expire after 5 minutes
-- Rate limiting on register and login (60-second cooldown per IP + email)
-- Zod input validation with structured error responses
-- mongo-sanitize prevents NoSQL injection
-- Sensitive configuration kept in environment variables
+```bash
+curl -X POST http://localhost:5000/api/v1/logout -b cookies.txt
+```
 
-## Notes
+## Security Notes
 
-- The project uses ES modules (`"type": "module"` in both `package.json` files).
-- Redis is mandatory — the backend exits on startup if `REDIS_URL` is not set.
-- Frontend pages are scaffolded; routing and API integration are still in progress.
-- For cross-origin cookie auth, configure CORS and set `secure: true` on cookies in production.
+- Passwords are hashed with bcrypt using 10 salt rounds.
+- Registration tokens and OTPs expire after 5 minutes.
+- Access tokens expire after 1 minute.
+- Refresh tokens expire after 7 days and are stored in Redis.
+- Auth cookies are httpOnly.
+- Rate limits are applied to register and login attempts by IP and email.
+- `sameSite: "none"` is used for auth cookies. In production, use HTTPS and enable `secure: true` consistently.
+- Keep `.env` files and secrets out of version control.
 
-## Future Enhancements
+## Current Development Notes
 
-- [ ] Wire up React Router and connect frontend pages to the API
-- [ ] Add password reset flow
-- [ ] Enable CORS for frontend-backend communication
-- [ ] Add comprehensive test suite
-- [ ] Production deployment configuration (HTTPS, secure cookies)
+- The backend depends on Redis and exits if `REDIS_URL` is missing.
+- CORS uses `FRONTEND_URL`, so make sure it matches the Vite dev server URL.
+- Frontend API integration is partially complete. The Login page calls the backend, while Register, Verify, VerifyOtp, and Dashboard still need full implementation.
+- The verification email currently links to `/token/:token`; make sure the frontend route matches this path when implementing email verification.
+- No automated tests are currently implemented.
 
 ## License
 

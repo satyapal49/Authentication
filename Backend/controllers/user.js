@@ -230,6 +230,47 @@ export const loginUser = TryCatch(async (req, res) => {
     })
 })
 
+// resendOtp: Sends a fresh OTP after the 60-second login/resend cooldown.
+export const resendOtp = TryCatch(async (req, res) => {
+    const sanitizeBody = sanitize(req.body);
+    const { email } = sanitizeBody;
+
+    if (!email) {
+        return res.status(400).json({
+            message: 'please provide email'
+        });
+    }
+
+    const rateLimitKey = `login-rate-limit:${req.ip}:${email}`;
+    if (await redisClient.get(rateLimitKey)) {
+        return res.status(429).json({
+            message: 'please wait 1 minute before requesting another otp',
+        });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+        return res.status(400).json({
+            message: 'User not Exists or Invalid credentials'
+        });
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpKey = `otp:${email}`;
+
+    await redisClient.set(otpKey, JSON.stringify(otp), { EX: 300 });
+
+    const subject = 'OTP for Verification';
+    const html = getOtpHtml({ email, otp });
+    await sendMail({ email, subject, html });
+
+    await redisClient.set(rateLimitKey, "true", { EX: 60 });
+
+    res.json({
+        message: 'a new otp has been sent. it will be valid for 5 mins'
+    });
+});
+
 // verifyOtp: Step 2 of login. Client posts email+otp to complete authentication.
 export const verifyOtp = TryCatch(async(req,res)=>{
     const {email, otp} = req.body;
