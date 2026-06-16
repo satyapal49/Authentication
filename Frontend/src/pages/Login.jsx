@@ -21,6 +21,7 @@ const Login = () => {
         { email, password },
         { withCredentials: true }
       )
+      localStorage.setItem('email', email);
       navigate('/VerifyOtp', { state: { email } })
     } catch (err) {
       setError(err.response?.data?.message || 'Something went wrong. Please try again.')

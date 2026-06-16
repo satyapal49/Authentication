@@ -5,6 +5,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import VerifyOtp from './pages/VerifyOtp'
 import Dashboard from './pages/Dashboard'
+import { ToastContainer } from 'react-toastify';
 
 const App = () => {
   return (
@@ -16,6 +17,7 @@ const App = () => {
         <Route path="/VerifyOtp" element={<VerifyOtp />} />
         <Route path="/Dashboard" element={<Dashboard />} />
       </Routes>
+      <ToastContainer />
     </BrowserRouter>
   )
 }

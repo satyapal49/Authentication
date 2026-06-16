@@ -7,7 +7,7 @@ import { redisClient } from '../index.js';
 export const generateToken = async (id, res) => {
     // Create an access token that lasts for 1 minute.
     const accessToken = jwt.sign({ id }, process.env.JWT_SECRET, {
-        expiresIn: "1m",
+        expiresIn: "15m",
     });
 
     // Create a refresh token that lasts for 7 days.
@@ -23,9 +23,9 @@ export const generateToken = async (id, res) => {
     // Set the access token and refresh token as HTTP-only cookies in the response.
     res.cookie("accessToken", accessToken, {
         httpOnly: true,
-        // secure: true,  // Uncomment this in production when using HTTPS
+        secure: true,  // Uncomment this in production when using HTTPS
         sameSite: "none",
-        maxAge: 1*60*1000,
+        maxAge: 15*60*1000,
     });
 
     // Set the refresh token as an HTTP-only cookie in the response.
@@ -33,7 +33,7 @@ export const generateToken = async (id, res) => {
         maxAge: 7*24*60*60*1000,
         httpOnly: true,
         sameSite: "none",
-        // secure: true,  // Uncomment this in production when using HTTPS
+        secure: true,  // Uncomment this in production when using HTTPS
     })
     // Return both tokens for further use if needed.
     return {accessToken, refreshToken};
@@ -63,9 +63,9 @@ export const generateAccessToken = (id, res) => {
     })
     res.cookie("accessToken", accessToken, {
         httpOnly: true,
-        secure: true,
+        secure: true,  // Uncomment this in production when using HTTPS
         sameSite: "none",
-        maxAge: 1*60*1000,
+        maxAge: 15*60*1000,
     });
 }
 

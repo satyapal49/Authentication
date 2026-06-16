@@ -63,6 +63,7 @@ const VerifyOtp = () => {
         { email, otp },
         { withCredentials: true }
       )
+      localStorage.setItem('email', email)
       navigate('/Dashboard')
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid OTP. Please try again.')
