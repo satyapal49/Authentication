@@ -59,13 +59,13 @@ export const verifyRefreshToken = async(refreshToken) =>{
 // generateAccessToken: creates a new access token for a given user id and sets it as a cookie in the response.
 export const generateAccessToken = (id, res) => {
     const accessToken = jwt.sign({id}, process.env.JWT_SECRET, {
-        expiresIn: "1m",
+        expiresIn: "15m",
     })
     res.cookie("accessToken", accessToken, {
         httpOnly: true,
         secure: true,  // Uncomment this in production when using HTTPS
         sameSite: "none",
-        maxAge: 15*60*1000,
+        maxAge: 1*60*1000,
     });
 }
 

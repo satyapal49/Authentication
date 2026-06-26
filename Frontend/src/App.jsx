@@ -6,20 +6,28 @@ import Register from './pages/Register'
 import VerifyOtp from './pages/VerifyOtp'
 import Dashboard from './pages/Dashboard'
 import { ToastContainer } from 'react-toastify';
+import { AppData } from './context/AppContext'
+import Loading from './Loading'
 
 const App = () => {
+  const {isAuth, loading } = AppData()
   return (
-    <BrowserRouter>
+    <>
+    {loading ? (
+      <Loading/>
+    ): (<BrowserRouter>
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/Login" element={<Login />} />
+        <Route path="/" element={isAuth ? <Home /> : <Login/>} />
+        <Route path="/Login" element={isAuth ? <Home /> : <Login/>} />
         <Route path="/Register" element={<Register />} />
-        <Route path="/VerifyOtp" element={<VerifyOtp />} />
-        <Route path="/Dashboard" element={<Dashboard />} />
+        <Route path="/VerifyOtp" element={isAuth ?  <Home /> : <VerifyOtp/>} />
+        <Route path="/Dashboard" element={isAuth ? <Dashboard /> : <Login />} />
       </Routes>
       <ToastContainer />
     </BrowserRouter>
-  )
-}
+  )};
+    </>
+  );
+};
 
 export default App
