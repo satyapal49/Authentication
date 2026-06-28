@@ -1,6 +1,7 @@
 import express from 'express';
-import { loginUser, myProfile, refreshToken, registerUser, verifyOtp, verifyUser, logoutUser, resendOtp } from '../controllers/user.js';
+import { loginUser, myProfile, refreshToken, registerUser, verifyOtp, verifyUser, logoutUser, resendOtp, refreshCSRFToken } from '../controllers/user.js';
 import { isAuth } from '../middlewares/isAuth.js'
+import { verifyCSRFToken } from '../config/csrfMiddleware.js';
 
 // Router groups authentication related routes under a single module.
 const router = express.Router();
@@ -16,6 +17,7 @@ router.post("/resend-otp", resendOtp);
 router.post("/verify-otp", verifyOtp);
 router.get("/me", isAuth, myProfile);
 router.post("/refresh", refreshToken);
-router.post("/logout", isAuth, logoutUser);
+router.post("/logout", isAuth, verifyCSRFToken, logoutUser);
+router.post("/refresh-csrf", isAuth, refreshCSRFToken);
 
 export default router;

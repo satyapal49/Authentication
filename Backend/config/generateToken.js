@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { redisClient } from '../index.js'; 
+import { generateCSRFToken, revokeCSRFToken } from './csrfMiddleware.js';
 
 // generateToken: create a JWT (JSON Web Token) for a given user id.
 // Returns the signed token string. This token can be returned to the client
@@ -35,8 +36,11 @@ export const generateToken = async (id, res) => {
         sameSite: "none",
         secure: true,  // Uncomment this in production when using HTTPS
     })
-    // Return both tokens for further use if needed.
-    return {accessToken, refreshToken};
+
+    const csrfToken = await generateCSRFToken(id, res);
+    
+
+    return {accessToken, refreshToken, csrfToken};
 };
 
 // verifyRefreshToken: checks if a given refresh token is valid and matches the one stored in Redis for the user.
@@ -73,4 +77,5 @@ export const generateAccessToken = (id, res) => {
 // revokeRefreshToken: removes the refresh token for a given user id from Redis, effectively logging the user out.
 export const revokeRefreshToken = async(userId)=>{
     await redisClient.del(`refresh_token:${userId}`);
+    await revokeCSRFToken(userId);
 };

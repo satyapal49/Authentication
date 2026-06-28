@@ -179,7 +179,7 @@ export const loginUser = TryCatch(async (req, res) => {
 
             firstErrorMessage = allError[0]?.message || "Validation Error";
 
-        }
+        };
 
         return res.status(400).json({
             message: firstErrorMessage,
@@ -193,8 +193,8 @@ export const loginUser = TryCatch(async (req, res) => {
     if (await redisClient.get(rateLimitKey)) {
         return res.status(429).json({
             message: 'too many request, try again later',
-        })
-    }
+        });
+    };
 
     // Find user in DB
     const user = await User.findOne({email});
@@ -202,7 +202,7 @@ export const loginUser = TryCatch(async (req, res) => {
         return res.status(400).json({
             message: 'User not Exists or Invalid credentials'
         });
-    }
+    };
 
     // Compare provided password with hashed password stored in DB
     const comparePassword = await bcrypt.compare(password, user.password);
@@ -210,7 +210,7 @@ export const loginUser = TryCatch(async (req, res) => {
         return res.status(400).json({
             message: 'User not Exists or Invalid credentials'
         });
-    }
+    };
 
     // Generate a 6-digit OTP and store it in Redis for 5 minutes
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -227,8 +227,8 @@ export const loginUser = TryCatch(async (req, res) => {
 
     res.json({
         message: 'if your email is valid, an otp has been sent. it will be valid for 5 mins'
-    })
-})
+    });
+});
 
 // resendOtp: Sends a fresh OTP after the 60-second login/resend cooldown.
 export const resendOtp = TryCatch(async (req, res) => {
@@ -239,21 +239,21 @@ export const resendOtp = TryCatch(async (req, res) => {
         return res.status(400).json({
             message: 'please provide email'
         });
-    }
+    };
 
     const rateLimitKey = `login-rate-limit:${req.ip}:${email}`;
     if (await redisClient.get(rateLimitKey)) {
         return res.status(429).json({
             message: 'please wait 1 minute before requesting another otp',
         });
-    }
+    };
 
     const user = await User.findOne({ email });
     if (!user) {
         return res.status(400).json({
             message: 'User not Exists or Invalid credentials'
         });
-    }
+    };
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const otpKey = `otp:${email}`;
@@ -278,22 +278,22 @@ export const verifyOtp = TryCatch(async(req,res)=>{
         return res.status(400).json({
             message: 'please provide all details'
         });
-    }
+    };
 
     const otpKey = `otp:${email}`;
     const storedOtpString = await redisClient.get(otpKey);
     if(!storedOtpString){
         return res.status(400).json({
             message: 'OTP is expired',
-        })
-    }
+        });
+    };
     const storedOtp = JSON.parse(storedOtpString);
 
     if(storedOtp !== otp){
         return res.status(400).json({
             message: "Invalid Otp"
-        })
-    }
+        });
+    };
     // Once verified, remove the OTP so it cannot be reused
     await redisClient.del(otpKey);
 
@@ -321,12 +321,12 @@ export const refreshToken = TryCatch(async(req, res)=>{
         return res.status(401).json({
             message: "Invalid refresh token"
         });
-    };
+    }
     const decode = await verifyRefreshToken(refreshToken)
     if(!decode){
         return res.status(401).json({
             message: "Invalid Refresh token",
-        })
+        });
     }
     generateAccessToken(decode.id, res);
 
@@ -344,10 +344,22 @@ export const logoutUser = TryCatch(async(req, res) => {
     // Clear the authentication cookies
     res.clearCookie("accessToken");
     res.clearCookie("refreshToken");
+    res.clearCookie("csrfToken");
 
     await redisClient.del(`user:${userId}`);
 
     res.json({
         message: "Logged out successfully"
+    });
+});
+
+
+export const refreshCSRFToken = TryCatch(async(req, res) => {
+    const userId = req.user._id;
+    const csrfToken = await generateCSRFToken(userId, res);
+
+    res.status(200).json({
+        message: "CSRF token refreshed successfully",
+        csrfToken: newCsrfToken,
     });
 });
