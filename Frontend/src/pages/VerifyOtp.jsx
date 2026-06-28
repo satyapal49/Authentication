@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, replace, useLocation, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { server } from '../main'
+import { AppData } from '../context/AppContext'
 
 const VerifyOtp = () => {
   const navigate = useNavigate()
+  const { setIsAuth, setUser } = AppData()
   const location = useLocation()
   const email = location.state?.email || ''
 
@@ -58,13 +60,15 @@ const VerifyOtp = () => {
     setLoading(true)
 
     try {
-      await axios.post(
+      const { data } = await axios.post(
         `${server}/api/v1/verify-otp`,
         { email, otp },
         { withCredentials: true }
       )
       localStorage.setItem('email', email)
-      navigate('/Dashboard')
+      setUser(data.user)
+      setIsAuth(true)
+      navigate('/Dashboard', { replace: true })
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid OTP. Please try again.')
     } finally {

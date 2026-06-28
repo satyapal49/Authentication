@@ -6,7 +6,7 @@ const getCookie = (name)=>{
     const value = `; ${document.cookie}`;
     const parts = value.split(`; ${name}=`)
     if(parts.length === 2) return parts.pop().split(";").shift();
-}
+};
 
 const api =  axios.create({
     baseURL: server,
@@ -15,7 +15,7 @@ const api =  axios.create({
 
 api.interceptors.request.use(
     (config)=>{
-        if(req.method === "post"  || req.method === "put"  || req.method === "delete") {
+        if(config.method === "post"  || config.method === "put"  || config.method === "delete") {
             const csrfToken = getCookie("csrfToken");
 
             if(csrfToken) {
@@ -61,7 +61,7 @@ api.interceptors.response.use(
         if (error.response?.status === 403 && !originalRequest._retry) {
             const errorCode = error.response.data?.code || "";
 
-            if(errorCode.startWith("CSRF_")){
+            if(errorCode.startsWith("CSRF_")){
                 if(isRefreshingCSRFToken){
                     return new Promise((resolve, reject)=>{
                         csrfFailedQueue.push({resolve, reject})
