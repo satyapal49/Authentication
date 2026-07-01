@@ -1,5 +1,5 @@
 import React from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -17,11 +17,11 @@ const App = () => {
       <Loading/>
     ): (<BrowserRouter>
       <Routes>
-        <Route path="/" element={isAuth ? <Home /> : <Login/>} />
-        <Route path="/Login" element={isAuth ? <Home /> : <Login/>} />
-        <Route path="/Register" element={<Register />} />
-        <Route path="/VerifyOtp" element={isAuth ?  <Home /> : <VerifyOtp/>} />
-        <Route path="/Dashboard" element={isAuth ? <Dashboard /> : <Login />} />
+        <Route path="/" element={isAuth ? <Home /> : <Navigate to="/Login" replace />} />
+        <Route path="/Login" element={isAuth ? <Navigate to="/Dashboard" replace /> : <Login />} />
+        <Route path="/Register" element={isAuth ? <Navigate to="/Dashboard" replace /> : <Register/>} />
+        <Route path="/VerifyOtp" element={isAuth ? <Navigate to="/Dashboard" replace /> : <VerifyOtp />} />
+        <Route path="/Dashboard" element={isAuth ? <Dashboard /> : <Navigate to="/Login" replace />} />
       </Routes>
       <ToastContainer />
     </BrowserRouter>

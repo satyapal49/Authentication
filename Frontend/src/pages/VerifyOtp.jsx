@@ -186,4 +186,4 @@ const VerifyOtp = () => {
   )
 }
 
-export default VerifyOtp
+export default VerifyOtp;
